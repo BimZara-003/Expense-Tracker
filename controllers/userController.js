@@ -35,7 +35,7 @@ const createUser = async (req, res) => { // User Registration Logic
             message: "User Created Successfully",
             firstName: newUser.firstName,
             lastName: newUser.lastName,
-            email: newUser.email
+            email: newUser.email,
         });
     } catch (error) {
         console.error("Error Creating User: ", error);
@@ -82,8 +82,11 @@ const userLogin = async (req, res) => { // User Login Logic
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            token: token
+            token: token,
+            userId: user._id
         });
+
+        console.log(req.body) //For DEBUGGING
         
     } catch (error) {
         console.log("Login Error",error)

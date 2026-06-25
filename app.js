@@ -1,5 +1,6 @@
 const express = require('express');
 const userRoutes = require('./routes/userRoutes');
+const expenseRoutes = require("./routes/expenseRoutes");
 const app = express();
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -19,7 +20,9 @@ app.get('/', (req, res) => {
     });
 });
 
+//Routes
 app.use('/api/users', userRoutes);
+app.use('/api/expenses', expenseRoutes);
 
 async function connectDB() {
     try {
