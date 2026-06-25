@@ -1,7 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const createUser = async (req, res) => {
+const createUser = async (req, res) => { // User Registration Logic
     try {
         const { firstName, lastName, email, password } = req.body;
 
@@ -11,9 +12,9 @@ const createUser = async (req, res) => {
             });
         };
 
-        const existingEmail = await User.find({ email });
+        const existingEmail = await User.findOne({ email });
 
-        if (existingEmail.length > 0) {
+        if (existingEmail) {
             return res.status(400).json({
                 message: "A User with this Email already exists"
             });
@@ -30,9 +31,11 @@ const createUser = async (req, res) => {
 
         await newUser.save();
 
-        res.status(201).json({
+        res.status(201).json({ // Successful User Creation Response
             message: "User Created Successfully",
-            user: newUser
+            firstName: newUser.firstName,
+            lastName: newUser.lastName,
+            email: newUser.email
         });
     } catch (error) {
         console.error("Error Creating User: ", error);
@@ -43,7 +46,7 @@ const createUser = async (req, res) => {
 
 };
 
-const userLogin = async (req, res) => {
+const userLogin = async (req, res) => { // User Login Logic
 
     try {
         const { email, password } = req.body;
@@ -72,9 +75,14 @@ const userLogin = async (req, res) => {
             });
         };
 
-        return res.status(200).json({
+        const token = jwt.sign({userId: user._id}, process.env.JWT_SECRET, {expiresIn: '5h'}); //JWT Token Generation
+
+        return res.status(200).json({ //Successful Login Response
             message: "Login Successful",
-            user: user
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            token: token
         });
         
     } catch (error) {
