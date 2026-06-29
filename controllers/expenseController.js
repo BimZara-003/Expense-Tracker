@@ -118,6 +118,8 @@ const userExpenses = async (req, res) => {
             getSummary(now.startOf("year").toDate(), now.endOf("year").toDate())
         ]);
 
+
+        console.log("User Expenses Retrieved");
         res.status(200).json({
             message: "Expenses Retrieved Successfully",
             today,
@@ -133,9 +135,40 @@ const userExpenses = async (req, res) => {
     }
 };
 
+const recentExpenses = async (req, res) => {
+
+    try {
+        const user = req.userId;
+        const recent = await Expense.find({userId: user})
+            .sort({date: -1})
+            .limit(10); //Get 10 Recent Expenses
+
+        const recentExpenses = recent.map((expense) => ({
+            id: expense._id,
+            title: expense.title,
+            expenseName: expense.expenseName,
+            amount: expense.amount,
+            date: expense.date
+        }));
+
+        console.log("User Recent Expenses Retireved");
+        res.status(200).json({
+            message: "Recent Expenses Rereieved Sucessfully",
+            recentExpenses
+        });
+
+    } catch (error) {
+        console.log("Recent Expenses Error", error);
+        res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+}
+
 module.exports = {
     createExpense,
     getAllExpenses,
     deleteExpense,
-    userExpenses
+    userExpenses,
+    recentExpenses
 };
