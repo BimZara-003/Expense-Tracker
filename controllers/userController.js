@@ -97,7 +97,31 @@ const userLogin = async (req, res) => { // User Login Logic
     }
 };
 
+    const userInformation = async (req,res) => {    //Get User Details
+
+        try {
+            const userId = req.userId
+            const user = await User.findById(userId);
+            const firstName = user.firstName;
+            const lastName = user.lastName;
+    
+            console.log("User Information Successfully Received");
+            res.status(200).json({
+                message: "User Information Recevied",
+                firstName,
+                lastName
+            });
+        } catch (error) {
+            console.log("User Information Retrival Error",error);
+            res.status(500).json({
+                message: "Internal Server Error"
+            });
+        }
+        
+    }
+
 module.exports = {
     createUser,
-    userLogin
+    userLogin,
+    userInformation
 };

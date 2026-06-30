@@ -94,10 +94,11 @@ const deleteExpense = async (req, res) => { // Delete Expense Logic
     }
 };
 
-const userExpenses = async (req, res) => {
+const userExpenses = async (req, res) => {  //Get Expenses Summary
     try {
         const user = req.userId;
         const now = dayjs();
+        const firstName = user.firstName
 
         const getSummary = async (start, end) => {
             const expenses = await Expense.find({
@@ -135,7 +136,7 @@ const userExpenses = async (req, res) => {
     }
 };
 
-const recentExpenses = async (req, res) => {
+const recentExpenses = async (req, res) => {    //Get User Recent Expenses
 
     try {
         const user = req.userId;
@@ -148,7 +149,7 @@ const recentExpenses = async (req, res) => {
             title: expense.title,
             expenseName: expense.expenseName,
             amount: expense.amount,
-            date: expense.date
+            date: expense.date.toISOString().split("T")[0]
         }));
 
         console.log("User Recent Expenses Retireved");
