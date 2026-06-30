@@ -55,9 +55,17 @@ const getAllExpenses = async (req, res) => { // Get Expenses Logic
         const user = req.userId;
         const expenses = await Expense.find({ userId: user }).sort({ date: -1 });
 
+        const expenseArray = expenses.map((expense) => ({
+            id: expense._id,
+            title: expense.title,
+            expenseName: expense.expenseName,
+            amount: expense.amount,
+            date: expense.amount
+        }));
+
         res.status(200).json({
             message: "Expenses retrieved successfully",
-            expenses: expenses
+            expenseArray
         });
     } catch (error) {
         console.error("Error fetching expenses: ", error);
