@@ -49,22 +49,27 @@ const createExpense = async (req, res) => {  // Create Expense Logic
     }
 };
 
-const getAllExpenses = async (req, res) => { // Get Expenses Logic
+const getAllExpenses = async (req, res) => { // Get Expenses using Expense Name Logic
 
     try {
         const user = req.userId;
-        const expenses = await Expense.find({ userId: user }).sort({ date: -1 });
+        let databaseQuery = {userId: user};
+
+        if (req.query.search) {
+            databaseQuery.expenseName = {$regex: req.query.search, $options: "i"};
+        }
+
+        const expenses = await Expense.find(databaseQuery).sort({date: -1});
 
         const expenseArray = expenses.map((expense) => ({
             id: expense._id,
             title: expense.title,
             expenseName: expense.expenseName,
             amount: expense.amount,
-            date: expense.amount
+            date: expense.date.toISOString().split("T")[0]
         }));
 
         res.status(200).json({
-            message: "Expenses retrieved successfully",
             expenseArray
         });
     } catch (error) {
