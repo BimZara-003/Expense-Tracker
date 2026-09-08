@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Expense = require('../models/expense');
+
 
 const createUser = async (req, res) => { // User Registration Logic
     try {
@@ -102,14 +104,21 @@ const userLogin = async (req, res) => { // User Login Logic
         try {
             const userId = req.userId
             const user = await User.findById(userId);
+            const totalTransactions = await Expense.countDocuments({ userId });
+            
             const firstName = user.firstName;
             const lastName = user.lastName;
+            const email = user.email;
+            const createdAt = user.createdAt;
     
             console.log("User Information Successfully Received");
             res.status(200).json({
                 message: "User Information Recevied",
                 firstName,
-                lastName
+                lastName,
+                email,
+                createdAt,
+                totalTransactions
             });
         } catch (error) {
             console.log("User Information Retrival Error",error);
@@ -120,8 +129,63 @@ const userLogin = async (req, res) => { // User Login Logic
         
     }
 
+const updateProfile = async (req, res) => {
+    try {
+        const { firstName, lastName, email } = req.body;
+        const userId = req.userId;
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { firstName, lastName, email },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+            email: updatedUser.email
+        });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.userId;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!passwordMatch) {
+            return res.status(400).json({ message: "Incorrect current password" });
+        }
+
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedNewPassword;
+        await user.save();
+
+        res.status(200).json({ message: "Password changed successfully" });
+    } catch (error) {
+        console.error("Error changing password:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 module.exports = {
     createUser,
     userLogin,
-    userInformation
+    userInformation,
+    updateProfile,
+    changePassword
 };
